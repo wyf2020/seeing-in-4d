@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Seeing in 4D: From Monocular Video to an Immersive 4D Gaussian World</title>
+<meta name="description" content="Seeing in 4D turns a single video into a 4D Gaussian scene you can explore from any angle in real time.">
+<meta property="og:title" content="Seeing in 4D">
+<meta property="og:description" content="From Monocular Video to an Immersive 4D Gaussian World">
+<meta name="theme-color" content="#ffffff">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff;--soft:#f6f7f9;--ink:#0f172a;--text:#334155;--muted:#64748b;--line:#e5e7eb;--accent:#0d9488;--radius:14px;color-scheme:light}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-decoration:none}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:max(24px,env(safe-area-inset-left))}
+h1,h2,h3{color:var(--ink);letter-spacing:-.02em;margin:0}
+h2{font-size:clamp(24px,3vw,32px);line-height:1.2;font-weight:700}
+.kicker{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin:0 0 10px}
+.lead{max-width:760px;margin:12px 0 0;color:var(--text)}
+section{padding-top:88px}
+video,img{display:block;width:100%;height:auto}
+
+/* header + hero */
+header{text-align:center;padding-top:72px}
+h1{font-size:clamp(40px,6vw,64px);line-height:1.05;font-weight:800}
+.tagline{font-size:clamp(17px,2vw,21px);color:var(--text);margin:14px 0 0}
+.authors{color:var(--muted);margin:18px auto 0;max-width:760px}
+.stage-wrap{max-width:1180px;margin:36px auto 0;padding-inline:max(16px,env(safe-area-inset-left))}
+.stage{position:relative;aspect-ratio:16/9;max-height:78vh;margin-inline:auto;border-radius:var(--radius);overflow:hidden;background:#0b0d10;box-shadow:0 1px 2px rgba(15,23,42,.06),0 24px 60px -24px rgba(15,23,42,.35)}
+.stage iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.live{position:absolute;left:14px;top:14px;display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:#fff;background:rgba(0,0,0,.45);backdrop-filter:blur(6px);padding:6px 11px;border-radius:999px;pointer-events:none}
+.live i{width:7px;height:7px;border-radius:50%;background:#f43f5e;box-shadow:0 0 0 3px rgba(244,63,94,.3)}
+.hint{position:absolute;right:14px;top:14px;font-size:12px;color:#fff;background:rgba(0,0,0,.45);padding:6px 11px;border-radius:999px;pointer-events:none;transition:opacity .6s}
+.hint.gone{opacity:0}
+.pip{position:absolute;left:14px;bottom:14px;width:24%;border-radius:10px;overflow:hidden;border:2px solid rgba(255,255,255,.85);box-shadow:0 6px 20px rgba(0,0,0,.35);pointer-events:none}
+.pip span{position:absolute;left:6px;top:6px;font-size:10px;font-weight:700;letter-spacing:.08em;color:#fff;background:rgba(0,0,0,.55);padding:2px 6px;border-radius:4px}
+.pills{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:18px 0 0}
+.pills button{font:inherit;font-size:14px;font-weight:600;color:var(--text);background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 16px;cursor:pointer;transition:all .2s}
+.pills button:hover{border-color:#cbd5e1}
+.pills button.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.cap{text-align:center;color:var(--muted);font-size:14px;margin:12px auto 0;max-width:720px}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:56px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.stat{padding:22px 12px;text-align:center}
+.stat+.stat{border-left:1px solid var(--line)}
+.stat b{display:block;font-size:clamp(24px,3vw,32px);font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.stat span{font-size:13.5px;color:var(--muted)}
+.abstract{max-width:820px;margin:40px auto 0;font-size:17.5px;line-height:1.75;color:var(--text);text-align:center}
+.abstract strong{color:var(--ink)}
+
+/* results */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:28px}
+.tile{position:relative;border-radius:12px;overflow:hidden;background:#0b0d10;aspect-ratio:16/9}
+.tile video{height:100%;object-fit:cover}
+.tile .name{position:absolute;right:10px;bottom:10px;font-size:13px;font-weight:600;color:#fff;background:rgba(0,0,0,.45);padding:4px 10px;border-radius:999px}
+.foot{color:var(--muted);font-size:14px;margin:14px 0 0}
+
+/* method */
+.two{display:grid;grid-template-columns:1.1fr 1fr;gap:36px;align-items:center;margin-top:28px}
+.media{border-radius:12px;overflow:hidden;background:var(--soft);border:1px solid var(--line)}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:28px}
+.card{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:18px}
+.card .n{font-size:12px;font-weight:700;color:var(--accent)}
+.card h3{font-size:16px;margin:6px 0 8px}
+.card p{font-size:14px;line-height:1.6;margin:0}
+.two .cards{grid-template-columns:1fr 1fr;margin-top:0}
+.note{color:var(--muted);font-size:13.5px;margin:0 0 10px}
+
+/* comparison */
+.cmpbox{display:grid;grid-template-columns:1fr;gap:24px;margin-top:28px;max-width:880px}
+.mtab{min-width:620px}
+.cmpbox>*{min-width:0}  /* let the metric table scroll inside its box instead of widening the page on phones */
+.cmpbox .pills{justify-content:flex-start;margin:0 0 12px}
+.cmpvid{border-radius:12px;overflow:hidden;background:#0b0d10}
+.bars h4{margin:0;color:var(--ink);font-size:15px}
+.bars>p{color:var(--muted);font-size:13.5px;margin:4px 0 16px}
+.bar{margin-bottom:12px}
+.bar .l{display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px}
+.bar .l b{color:var(--ink);font-variant-numeric:tabular-nums}
+.bar .t{height:10px;background:var(--soft);border-radius:99px;overflow:hidden}
+.bar .t i{display:block;height:100%;background:#cbd5e1;border-radius:99px}
+.bar.ours .l span,.bar.ours .l b{color:var(--accent);font-weight:700}
+.bar.ours .t i{background:var(--accent)}
+.why{font-size:13.5px;color:var(--text);background:var(--soft);border-radius:10px;padding:12px 14px;margin-top:16px}
+
+/* data */
+.counters{display:flex;gap:40px;margin:24px 0 22px}
+.counter b{display:block;font-size:30px;font-weight:800;color:var(--ink);letter-spacing:-.02em}
+.counter span{font-size:13.5px;color:var(--muted)}
+.tablewrap{overflow-x:auto;margin-top:26px;border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:720px}
+th,td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--line)}
+th{font-size:12.5px;color:var(--muted);font-weight:600;background:var(--soft)}
+td.n{text-align:right;font-variant-numeric:tabular-nums}
+tr:last-child td{border-bottom:0}
+tr.ours td{font-weight:700;color:var(--ink);background:#f0fdfa}
+.figcap{color:var(--muted);font-size:13.5px;margin:10px 0 0}
+
+footer{margin-top:96px;padding:28px 0 max(40px,env(safe-area-inset-bottom));border-top:1px solid var(--line);color:var(--muted);font-size:14px;text-align:center}
+
+@media (max-width:900px){
+  .cards{grid-template-columns:1fr 1fr} .two,.cmpbox{grid-template-columns:1fr}
+  .stats{grid-template-columns:1fr 1fr} .stat:nth-child(3){border-left:0} .stat:nth-child(n+3){border-top:1px solid var(--line)}
+}
+@media (max-width:620px){
+  header{padding-top:48px} section{padding-top:64px}
+  .grid,.cards{grid-template-columns:1fr}
+  .pip{width:34%;left:10px;bottom:10px} .live{left:10px;top:10px;font-size:11px;padding:5px 9px} .hint{display:none}
+  .counters{gap:24px} .counter b{font-size:24px}
+  .abstract{text-align:left;font-size:16px} .cap{text-align:left}
+  .two .cards{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<header class="wrap">
+  <h1>Seeing in 4D</h1>
+  <p class="tagline">From Monocular Video to an Immersive 4D Gaussian World</p>
+  <p class="authors">Yifan Wang &nbsp;·&nbsp; Xinhang Liu &nbsp;·&nbsp; Haotong Lin &nbsp;·&nbsp; Zhijie Lin &nbsp;·&nbsp; Zhen Xu &nbsp;·&nbsp; Xiaowei Zhou &nbsp;·&nbsp; Bingyi Kang</p>
+</header>
+
+<div class="stage-wrap">
+  <div class="stage" id="stage">
+    <iframe id="viewer" title="Interactive 4D Gaussian scene" allow="fullscreen; xr-spatial-tracking" allowfullscreen src="about:blank"></iframe>
+    <div class="live"><i></i>LIVE 4D · rendered in your browser</div>
+    <div class="hint" id="hint">Drag to take the camera · Scroll to zoom</div>
+    <div class="pip"><video id="heropip" src="static/hero_input_catblue.mp4" autoplay muted loop playsinline></video><span>INPUT VIDEO</span></div>
+  </div>
+  <div class="pills" id="heropills"></div>
+  <p class="cap">Reconstructed from the video in the corner, rendered live. Drag to look around.</p>
+</div>
+
+<div class="wrap">
+  <div class="stats">
+    <div class="stat"><b>1 → 9</b><span>synchronized views from one video</span></div>
+    <div class="stat"><b>±60°</b><span>around the subject</span></div>
+    <div class="stat"><b>Real-time</b><span>free-viewpoint 4D playback</span></div>
+    <div class="stat"><b>1M+</b><span>rendered multi-view training videos</span></div>
+  </div>
+  <p class="abstract"><strong>One video in, a 4D scene out.</strong> A post-trained video model generates nine synchronized views of the input, and FreeTimeGS lifts them into 4D Gaussians you can explore in real time.</p>
+</div>
+
+<section id="results"><div class="wrap">
+  <p class="kicker">Results</p>
+  <h2>Free-viewpoint 4D from a single video.</h2>
+  <div class="grid" id="results-grid"></div>
+</div></section>
+
+<section id="method"><div class="wrap">
+  <p class="kicker">Method</p>
+  <h2>Nine synchronized views, then 4D.</h2>
+  <div class="two">
+    <div class="media"><video data-src="static/videos/v101_grid9_underwater-white-dress.mp4" muted loop playsinline></video></div>
+    <div class="cards">
+      <div class="card"><div class="n">01</div><h3>Multi-view as multi-shot</h3><p>Each target camera is a shot in one sequence, so attention ties the views together.</p></div>
+      <div class="card"><div class="n">02</div><h3>Geometry-aware conditioning</h3><p>Depth-warped input, visibility masks and Plücker rays guide every view.</p></div>
+      <div class="card"><div class="n">03</div><h3>Cross-view consistency loss</h3><p>A pixel-level loss keeps the generated views in agreement.</p></div>
+      <div class="card"><div class="n">04</div><h3>4D Gaussian lifting</h3><p>FreeTimeGS turns the nine views into real-time 4D Gaussians.</p></div>
+    </div>
+  </div>
+</div></section>
+
+<section id="comparison"><div class="wrap">
+  <p class="kicker">Comparison</p>
+  <h2>Consistent views make clean 4D.</h2>
+  <div class="cmpbox">
+    <div>
+      <div class="pills" id="pills"></div>
+      <div class="cmpvid"><video id="cmpv" muted loop playsinline autoplay></video></div>
+    </div>
+    <div class="bars">
+      <p class="note">FreeTimeGS fit to four of five views (15° apart), scored on the held-out view; 20 videos. M-: dynamic region.</p>
+      <div class="tablewrap" style="margin-top:0"><table class="mtab">
+        <thead><tr><th>Method</th><th>PSNR ↑</th><th>SSIM ↑</th><th>LPIPS ↓</th><th>M-PSNR ↑</th><th>M-SSIM ↑</th><th>M-LPIPS ↓</th></tr></thead>
+        <tbody>
+          <tr><td>ReCamMaster</td><td class="n">15.62</td><td class="n">0.631</td><td class="n">0.569</td><td class="n">15.56</td><td class="n">0.387</td><td class="n">0.088</td></tr>
+          <tr><td>TrajectoryCrafter</td><td class="n">16.40</td><td class="n">0.574</td><td class="n">0.552</td><td class="n">16.11</td><td class="n">0.361</td><td class="n">0.080</td></tr>
+          <tr><td>NeoVerse</td><td class="n">17.61</td><td class="n">0.678</td><td class="n">0.433</td><td class="n">17.27</td><td class="n">0.447</td><td class="n">0.075</td></tr>
+          <tr class="ours"><td>Ours</td><td class="n">21.11</td><td class="n">0.803</td><td class="n">0.338</td><td class="n">22.77</td><td class="n">0.685</td><td class="n">0.032</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+</div></section>
+
+<section id="data"><div class="wrap">
+  <p class="kicker">Data Engine</p>
+  <h2>Rendered multi-view training data.</h2>
+  <div class="counters">
+    <div class="counter"><b>1,100</b><span>scene assets</span></div>
+    <div class="counter"><b>600+</b><span>avatars</span></div>
+    <div class="counter"><b>1M+</b><span>rendered videos</span></div>
+  </div>
+  <div class="media"><video data-src="static/videos/data_engine_gallery.mp4" muted loop playsinline></video></div>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Dataset</th><th>Env. assets</th><th>Character assets</th><th>Anim. assets</th><th>Scenes</th><th>Views / scene</th><th>Videos</th></tr></thead>
+    <tbody>
+      <tr><td>BEDLAM 2.0</td><td class="n">15</td><td>parametric (body / cloth / hair / shoe)</td><td class="n">4,643</td><td class="n">27K</td><td class="n">1</td><td class="n">27K</td></tr>
+      <tr><td>SynCamMaster</td><td class="n">–</td><td>–</td><td class="n">–</td><td class="n">~500</td><td class="n">36</td><td class="n">~18K</td></tr>
+      <tr><td>ReCamMaster</td><td class="n">40</td><td>70 (Fab + Mixamo)</td><td class="n">~100</td><td class="n">13.6K</td><td class="n">10</td><td class="n">136K</td></tr>
+      <tr class="ours"><td>Ours</td><td class="n">1,100</td><td>600+ (RenderPeople, MetaHuman, Mixamo)</td><td class="n">3,800</td><td class="n">100K+</td><td class="n">7–14</td><td class="n">1M+</td></tr>
+    </tbody>
+  </table></div>
+</div></section>
+
+<footer><div class="wrap">Seeing in 4D · ByteDance Seed. 4D reconstruction with <a href="https://zju3dv.github.io/freetimegs/">FreeTimeGS</a> (CVPR 2025).</div></footer>
+
+<script>
+const SCENES=[['catblue','Cat batting a feather toy','Cat and feather'],['kitten','Kitten and a ball of yarn','Kitten'],
+ ['fan','Opening a folding fan · ±30°','Folding fan'],['underwater3','Drifting underwater','Underwater']];
+const RESULTS=SCENES;
+const io=new IntersectionObserver(es=>es.forEach(e=>{const v=e.target;
+  if(e.isIntersecting){if(!v.getAttribute('src'))v.src=v.dataset.src;v.play().catch(()=>{});}else v.pause();}),{rootMargin:'250px 0px'});
+const grid=document.getElementById('results-grid');
+for(const [id,name] of RESULTS){const t=document.createElement('div');t.className='tile';
+  t.innerHTML=`<video muted loop playsinline preload="none" data-src="static/paths3/${id}_lissajous.mp4" poster="static/posters3/${id}_lissajous.jpg"></video><div class="name">${name}</div>`;grid.append(t);}
+document.querySelectorAll('video[data-src]').forEach(v=>io.observe(v));
+const CMP=[['studio-black-dress','Studio'],['grassland-samurai','Grassland'],['fuji-torii-white-dress','Lakeside shrine'],['dual-robot-arms-towel','Robot arms']];
+const pills=document.getElementById('pills'),cv=document.getElementById('cmpv');
+function showCmp(i){const [id]=CMP[i];cv.poster=`static/posters/${id}.jpg`;cv.src=`static/cmp/${id}.mp4`;cv.play().catch(()=>{});
+  pills.querySelectorAll('button').forEach((b,j)=>b.classList.toggle('on',i===j));}
+CMP.forEach(([id,name],i)=>{const b=document.createElement('button');b.textContent=name;b.onclick=()=>showCmp(i);pills.append(b);});
+showCmp(0);
+const HB=new URL('viewer/hero/',location.href).href;
+const hurl=(b,n,cfg)=>b+'viewer/index.html?content='+encodeURIComponent(b+'scenes/'+n+'/4dm.json')+'&cpath='+encodeURIComponent(b+'scenes/'+n+'/'+cfg)+'&noanim=&test_auto_view=false&showdemo=seeing4d&device=webgl2';
+const HEROES=SCENES.map(([id,,short])=>[short,hurl(HB,id,'settings.json'),`static/hero_input_${id}.mp4`]);
+const hp=document.getElementById('heropills');
+HEROES.forEach(([n,u,pip],i)=>{const b=document.createElement('button');b.textContent=n;if(!i)b.classList.add('on');
+  b.onclick=()=>{if(b.classList.contains('on'))return;document.getElementById('viewer').src=u;document.getElementById('heropip').src=pip;
+    hp.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));};hp.append(b);});
+document.getElementById('viewer').src=HEROES[0][1];
+setTimeout(()=>document.getElementById('hint').classList.add('gone'),9000);
+</script>
+</body>
+</html>

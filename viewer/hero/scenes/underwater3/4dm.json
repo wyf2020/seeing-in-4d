@@ -1,0 +1,26 @@
+{
+  "version": 2,
+  "duration": 0.9666666666666667,
+  "settingPath": "settings.json",
+  "presets": {
+    "opencv": {
+      "rotation": [
+        180,
+        0,
+        0
+      ]
+    }
+  },
+  "timeline": [
+    {
+      "id": "underwater3",
+      "name": "underwater3",
+      "plyPath": "viewer.ply",
+      "presetId": "opencv",
+      "recordIn": 0,
+      "recordOut": 0.9666666666666667,
+      "sourceIn": 0,
+      "sourceOut": 0.9666666666666667
+    }
+  ]
+}
